@@ -18,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
@@ -42,9 +43,7 @@ public class Table extends Application {
 
         //db
         connectToDB();
-        
-        
-        
+
         Button btnAdd = new Button("   Add   ");
         Button btn1 = new Button("  Search  ");
         Button btn2 = new Button("  Delete  ");
@@ -57,25 +56,21 @@ public class Table extends Application {
         typeT.setPromptText("type");
         TextField costT = new TextField();
         costT.setPromptText("cost");
-        
-                
 
         //Action 
-       
         btnAdd.setOnAction((ActionEvent e) -> {
             try {
-                addItem(monthT.getText(),dayT.getText(),typeT.getText(),costT.getText());
+                addItem(monthT.getText(), dayT.getText(), typeT.getText(), costT.getText());
             } catch (SQLException ex) {
                 Logger.getLogger(Table.class.getName()).log(Level.SEVERE, null, ex);
             }
             connectToDB();
         });
-        
-        btn1.setOnAction(e-> {
-        
+
+        btn1.setOnAction(e -> {
+
             Search search = new Search();
-            
-        
+
         });
 
         TableColumn<Item, String> mon = new TableColumn<>("Month");
@@ -102,12 +97,14 @@ public class Table extends Application {
 
         HBox h = new HBox();
         h.setSpacing(10);
+        h.setAlignment(Pos.CENTER);
         h.setPadding(new Insets(10));
         h.getChildren().addAll(btn1, btn2);
         //Text fieljd to add 
         HBox hT = new HBox();
         hT.getChildren().addAll(monthT, dayT, typeT, costT, btnAdd);
         hT.setSpacing(10);
+        hT.setAlignment(Pos.CENTER);
         hT.setPadding(new Insets(10));
         root.getChildren().addAll(h, hT, t);
 
@@ -118,7 +115,6 @@ public class Table extends Application {
         primaryStage.show();
     }
 
-   
     public void connectToDB() {
 
         items.clear();
@@ -147,33 +143,27 @@ public class Table extends Application {
 
     }
 
-    public void addItem(String monthT,String dayT, String typeT, String costT) throws SQLException {
-        //getData
+    public void addItem(String monthT, String dayT, String typeT, String costT) throws SQLException {
+
         try {
+            //getData
+            int month = Integer.parseInt(monthT);
+            int day = Integer.parseInt(dayT);
+            double cost = Double.parseDouble(costT);
 
-          int  month = Integer.parseInt(monthT);
-          int  day = Integer.parseInt(dayT);
-          double cost = Double.parseDouble(costT);
-        
-          //connectionand ADD
-          Connection conn = DriverManager.getConnection("jdbc:sqlite:Items.db");
-            Statement stmt  = conn.createStatement();
-       stmt.executeUpdate("INSERT INTO item VALUES("+month+","+day+",'"
-                    +typeT+"',"+cost+")");
+            //connectionand to  Add 
+            Connection conn = DriverManager.getConnection("jdbc:sqlite:Items.db");
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("INSERT INTO item VALUES(" + month + "," + day + ",'"
+                    + typeT + "'," + cost + ")");
 
-            
-          //   stmt.executeQuery("INSERT INTO item (month ,day ,type , cost ) VALUES(10 , 15 , "dsds" , 45.2)");
             stmt.close();
             conn.close();
-            
-          
+
         } catch (NumberFormatException e) {
             System.out.println(e.getMessage());
         }
 
-        
-        
-        
     }
 
     /**
@@ -184,5 +174,3 @@ public class Table extends Application {
     }
 
 }
-
-

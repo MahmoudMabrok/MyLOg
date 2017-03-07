@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -32,9 +33,9 @@ import javafx.stage.Stage;
 public class Search {
 
     TextField monthT, monSum;
-    TextField dayT;
+    TextField dayT , dayS;
 
-    Label sumM;
+    Label sumM ,toS,toSum ;
     ObservableList<Item> items = FXCollections.observableArrayList();
 
     public Search() {
@@ -62,25 +63,31 @@ public class Search {
         //controls 
         monthT = new TextField();
         monSum = new TextField();
-        monthT.setPromptText("month to search ");
-        monSum.setPromptText("month to get sum of all cost  ");
-        //sumM=new Lable (" oh you spent 0   , you should save your money  ^^^^ ") ; 
+        dayT = new TextField();
+        dayS = new TextField();
+
+        
+        
+        toS = new Label("enter (month-day) to search ::  0 to all days  ::  ");
+        toSum = new Label("enter (month-day) to sum of cost ::  0 to all days  ::  "); 
         sumM = new Label("your spent is  :: ");
         Button s = new Button(":: search  :: ");
-        Button s2 = new Button(" :: sum of month :: ");
+        Button s2 = new Button(" :: sum of costs :: ");
 
         //actions 
-        s.setOnAction(e -> {
+        s.setOnAction((ActionEvent e) -> {
             //as it will sent to sql as string 
             String x = monthT.getText();
+            String y = dayT.getText();
 
-            show(x);
+
+            show(x , y );
 
         });
         s2.setOnAction(e -> {
-            String x = monSum.getText();
-
-            sum(x);
+            String xx = monSum.getText();
+             String yy = dayS.getText();
+            sum(xx ,yy );
 
         });
 
@@ -93,8 +100,9 @@ public class Search {
         //select month 
         HBox h = new HBox();
         h.setSpacing(10);
+        h.setAlignment(Pos.CENTER);
         h.setPadding(new Insets(10));
-        h.getChildren().addAll(monthT, s);
+        h.getChildren().addAll( toS,monthT,dayT, s);
 
         
         //sum of month
@@ -102,11 +110,11 @@ public class Search {
         h2.setSpacing(10);
         h2.setAlignment(Pos.CENTER);
         h2.setPadding(new Insets(10));
-        h2.getChildren().addAll(monSum, sumM, s2);
+        h2.getChildren().addAll( toSum, monSum, dayS, sumM, s2);
 
         root.getChildren().addAll(h, h2, t);
 
-        Scene sce = new Scene(root, 800, 150);
+        Scene sce = new Scene(root, 1000, 150);
 
         window.setScene(sce);
         window.setTitle("search in Log ");
@@ -114,14 +122,36 @@ public class Search {
 
     }
 
-    public void show(String month) {
+    public void show(String month, String day ) {
         items.clear();
+        
+        
+        //default is search for all days of a month 
+        String sql ="select * from item where month=" + month + "" ;
+        
+        
+        //search for all records 
+        if ( month.equals("0") && day.equals("0"))
+            sql = "select * from item  ";
+       //search for days  from all months 
+        else if (month.equals("0"))
+        sql = "select * from item where day=" + day + "" ;
+        // search for all days of a month 
+        else if (day.equals("0") ) 
+            sql = "select * from item where month=" + month + " " ; 
+        //search for a day to a month 
+        else 
+            sql = "select * from item where month=" + month + " and day ="+day+"";
+        
+        
+        
+        
         try {
             Connection c = DriverManager.getConnection("jdbc:sqlite:Items.db");
             Statement st = c.createStatement();
 
             //select a row of specific month 
-            ResultSet rs = st.executeQuery("select * from item where month=" + month + "");
+            ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {
                 //add item
@@ -140,19 +170,37 @@ public class Search {
 
     }
 
-    public void sum(String m) {
+    public void sum(String month, String day ) {
+        
+         //default is cost for all days of a month 
+        String sql  ;
+       // "select sum(cost) from item where month=" + month + "" 
+        
+        //cost for all records 
+        if ( month.equals("0") && day.equals("0"))
+            sql = " select sum(cost) from item  where month > 0 ";
+       //cost for days  from all months 
+        else if (month.equals("0"))
+        sql = "select sum(cost) from item where day =" + day + "" ;
+        // cost for all days of a month 
+        else if (day.equals("0") ) 
+            sql = "select sum(cost) from item where month=" + month + ""; 
+        //cost  for a day to a month 
+        else 
+            sql = "select sum(cost) from item where month =" + month + " and day= "+day +"";
 
         try {
             Statement st;
-            try (Connection c = DriverManager.getConnection("jdbc:sqlite:Items.db")) {
+            Connection c = DriverManager.getConnection("jdbc:sqlite:Items.db"); 
                 st = c.createStatement();
                 //select a row of specific month
-                ResultSet rs = st.executeQuery("select sum(cost) from item where month=" + m + "");
+                ResultSet rs = st.executeQuery(sql);
 
                 sumM.setText("oh you spent " + rs.getString(1) + ", you should save your money  ^^^^");
 
-            }
+            
             st.close();
+            c.close();
 
         } catch (SQLException s) {
             System.out.println(s.toString());
