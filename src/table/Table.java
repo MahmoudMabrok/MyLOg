@@ -16,7 +16,7 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -61,6 +61,7 @@ public class Table extends Application {
                 
 
         //Action 
+       
         btnAdd.setOnAction((ActionEvent e) -> {
             try {
                 addItem(monthT.getText(),dayT.getText(),typeT.getText(),costT.getText());
@@ -103,7 +104,7 @@ public class Table extends Application {
         h.setSpacing(10);
         h.setPadding(new Insets(10));
         h.getChildren().addAll(btn1, btn2);
-//Text fieljd to add 
+        //Text fieljd to add 
         HBox hT = new HBox();
         hT.getChildren().addAll(monthT, dayT, typeT, costT, btnAdd);
         hT.setSpacing(10);
@@ -183,3 +184,5 @@ public class Table extends Application {
     }
 
 }
+
+
